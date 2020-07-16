@@ -24,15 +24,21 @@ clean_exam_bp <- function(
   var_guide <- tibble(
     term = c(
       'bp_sys_mmhg',
-      'bp_dia_mmhg'
+      'bp_dia_mmhg',
+      'n_msr_sbp',
+      'n_msr_dbp'
     ),
     nhanes = c(
+      'BPXSY1 - BPXSY4',
+      'BPXDI1 - BPXDI4',
       'BPXSY1 - BPXSY4',
       'BPXDI1 - BPXDI4'
     ),
     descr = c(
       'Systolic blood pressure, mm Hg',
-      'Diastolic blood pressure, mm Hg'
+      'Diastolic blood pressure, mm Hg',
+      'Number of systolic blood pressure readings',
+      'Number of diastolic blood pressure readings'
     )
   )
 

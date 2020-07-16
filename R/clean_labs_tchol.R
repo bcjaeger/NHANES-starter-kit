@@ -9,11 +9,11 @@ clean_labs_tchol <- function(
   include_variable_labels = TRUE
 ) {
 
-  fnames <- make_exam_files(exams, data_label = 'HDL')
+  fnames <- make_exam_files(exams, data_label = 'TCHOL')
 
-  if(1999 %in% exams) fnames['1999-2000'] %<>% str_replace('HDL', 'LAB13')
-  if(2001 %in% exams) fnames['2001-2002'] %<>% str_replace('HDL', 'L13')
-  if(2003 %in% exams) fnames['2003-2004'] %<>% str_replace('HDL', 'L13')
+  if(1999 %in% exams) fnames['1999-2000'] %<>% str_replace('TCHOL', 'LAB13')
+  if(2001 %in% exams) fnames['2001-2002'] %<>% str_replace('TCHOL', 'L13')
+  if(2003 %in% exams) fnames['2003-2004'] %<>% str_replace('TCHOL', 'L13')
 
   var_guide <- tibble(
     term = c('chol_total_mgdl'),

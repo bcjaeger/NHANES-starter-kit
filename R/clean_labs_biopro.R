@@ -15,44 +15,6 @@ clean_labs_biopro <- function(
   if(2001 %in% exams) fnames['2001-2002'] %<>% str_replace('BIOPRO', 'L40')
   if(2003 %in% exams) fnames['2003-2004'] %<>% str_replace('BIOPRO', 'L40')
 
-  data_out <- map_dfr(
-    .x = fnames,
-    .f = read_xpt,
-    .id = 'exam'
-  )
-
-  if(2001 %in% exams)
-    data_out %<>% mutate(
-      # serum creatinine (mg/dl) was LBDSCR in 2001-2002 and LBXSCR otherwise.
-      LBXSCR = coalesce(LBXSCR, LBDSCR),
-      # phosphorus (mg/dl) was LBDSPH in 2001-2002 and LBXSPH otherwise.
-      LBXSPH = coalesce(LBXSPH, LBDSPH),
-      # total bilirubin (mg/dl) was LBDSTB in 2001-2002 and LBXSTB otherwise.
-      LBXSTB = coalesce(LBXSTB, LBDSTB),
-    )
-
-
-  data_out %<>%
-    select(
-      exam,
-      seqn                  = SEQN,
-      bili_total_mgdl       = LBXSTB,
-      blood_urea_nitro_mgdl = LBXSBU,
-      calcium_total_mgdl    = LBXSCA,
-      creat_mgdl            = LBXSCR,
-      gluc_mgdl             = LBXSGL,
-      iron_ugdl             = LBXSIR,
-      phosphorus_mgdl       = LBXSPH
-    )
-
-  # for looking at variable pairs over different exams
-  # data_out %>%
-  #   group_by(exam) %>%
-  #   slice(1:3) %>%
-  #   select(exam, LBXSTB, LBDSTB) %>%
-  #   View()
-
-
   var_guide <- tibble(
     term = c(
       'bili_total_mgdl',
@@ -82,6 +44,42 @@ clean_labs_biopro <- function(
       "Phosphorus, mg/dL"
     )
   )
+
+  .names <- c("LBXSTB",
+              "LBDSTB",
+              "LBXSBU",
+              "LBXSCA",
+              "LBXSCR",
+              "LBDSCR",
+              "LBXSGL",
+              "LBXSIR",
+              "LBXSPH",
+              "LBDSPH")
+
+  data_in <- fnames %>%
+    map_dfr(.f = read_xpt, .id = 'exam') %>%
+    add_missing_cols(.names) %>%
+    mutate(
+      # serum creatinine (mg/dl) was LBDSCR in 2001-2002 and LBXSCR otherwise.
+      LBXSCR = coalesce(LBXSCR, LBDSCR),
+      # phosphorus (mg/dl) was LBDSPH in 2001-2002 and LBXSPH otherwise.
+      LBXSPH = coalesce(LBXSPH, LBDSPH),
+      # total bilirubin (mg/dl) was LBDSTB in 2001-2002 and LBXSTB otherwise.
+      LBXSTB = coalesce(LBXSTB, LBDSTB),
+    )
+
+  data_out <- data_in %>%
+    select(
+      exam,
+      seqn                  = SEQN,
+      bili_total_mgdl       = LBXSTB,
+      blood_urea_nitro_mgdl = LBXSBU,
+      calcium_total_mgdl    = LBXSCA,
+      creat_mgdl            = LBXSCR,
+      gluc_mgdl             = LBXSGL,
+      iron_ugdl             = LBXSIR,
+      phosphorus_mgdl       = LBXSPH
+    )
 
   if(include_variable_labels){
     add_labels(data_out, var_guide)

@@ -14,7 +14,7 @@ clean_qx_healthcare_utilization <- function(
   var_guide <- tibble(
     term = c(
       'hc_usual_facility',
-      'hc_visit_1yr'
+      'hc_visit_in_past_year'
     ),
     nhanes = c(
       'HUQ030',
@@ -26,26 +26,30 @@ clean_qx_healthcare_utilization <- function(
     )
   )
 
-
-
-  data_in <- map_dfr(
-    .x = fnames,
-    .f = read_xpt,
-    .id = 'exam'
-  )
+  data_in <- fnames %>%
+    map_dfr(.f = read_xpt, .id = 'exam') %>%
+    add_missing_cols(.names = c('HUQ030', 'HUQ050', 'HUQ051'))
 
   # Variable derivation ----
 
   # Creating `hc_usual_facility` requires recoding `HUQ030`, which is
   # measured consistently throughout all NHANES visits through 2017-2018.
 
-  # To create `hc_visit_1yr`, we use both `HUQ050` (measured from the 1999
-  # exam through the 2011 exam) and `HUQ051` (measured in the 2013, 2015,
-  # and 2017 exams). First, we coalesce these two columns, and then recode
-  # the data as follows:
+  data_in %<>% mutate(
+    hc_usual_facility = recode(
+      HUQ030,
+      "1"	= "yes",
+      "2"	= "no",
+      "3"	= "yes",
+      "7"	= NA_character_,
+      "9"	= NA_character_
+    ),
+    hc_visit_in_past_year = coalesce(HUQ050, HUQ051)
+  )
 
-  # - If number of visits in the past year is 0, then `"No"`
-  # - If number of visit value is anything in the range of 1 to 8, "Yes"
+  # recode the hc_visit_in_past_year variable to 'yes' or 'no'
+  # - If number of visits in the past year is 0, then "no"
+  # - If number of visit value is anything in the range of 1 to 8, "yes"
   # - Otherwise set as missing.
   # (why?) the coded values of HUQ050/HUQ051 represent the following:
   # 0   =  None
@@ -64,18 +68,11 @@ clean_qx_healthcare_utilization <- function(
     transmute(
       exam,
       seqn = SEQN,
-      hc_usual_facility = recode(
-        HUQ030,
-        "1"	= "yes",
-        "2"	= "no",
-        "3"	= "yes",
-        "7"	= NA_character_,
-        "9"	= NA_character_
-      ),
-      hc_visit_1yr = coalesce(HUQ050, HUQ051),
-      hc_visit_1yr = case_when(
-        hc_visit_1yr == 0 ~ "no",
-        hc_visit_1yr %in% c(1:8) ~ "yes"
+      hc_usual_facility,
+      hc_visit_in_past_year = case_when(
+        hc_visit_in_past_year == 0 ~ "no",
+        hc_visit_in_past_year %in% c(1:8) ~ "yes",
+        TRUE ~ NA_character_
       )
     )
 

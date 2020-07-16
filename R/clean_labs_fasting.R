@@ -28,7 +28,7 @@ clean_labs_fasting <- function(
     .x = fnames,
     .f = read_xpt,
     .id = 'exam'
-  )%>%
+  ) %>%
     select(exam,
            seqn = SEQN,
            fasted_hours   = PHAFSTHR,

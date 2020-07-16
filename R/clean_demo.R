@@ -13,11 +13,48 @@ clean_demo <- function(
 
 
   # retrieve data
-  data_all <- map_dfr(
-    .x = make_exam_files(exams, data_label = 'DEMO'),
-    .f = read_xpt,
-    .id = 'exam'
+  fnames <- make_exam_files(exams, data_label = 'DEMO')
+
+  var_guide <- tibble(
+    term = c(
+      'age',
+      'sex',
+      'race_ethnicity',
+      'education',
+      'income_hh',
+      'pregnant'
+    ),
+    nhanes = c(
+      'RIDAGEYR',
+      'RIAGENDR',
+      'RIDRETH1 and RIDRETH3',
+      'DMDEDUC2 and DMDEDUC3',
+      'INDHHINC and INDHHIN2',
+      'RIDEXPRG'
+    ),
+    descr = c(
+      "age in years",
+      "sex",
+      "race and ethnicity",
+      "education",
+      "household income",
+      "pregnancy status"
+    )
   )
+
+  .names <- c('RIDAGEYR',
+              'RIAGENDR',
+              'RIDRETH1',
+              'RIDRETH3',
+              'DMDEDUC2',
+              'DMDEDUC3',
+              'INDHHINC',
+              'INDHHIN2',
+              'RIDEXPRG')
+
+  data_in <- fnames %>%
+    map_dfr(.f = read_xpt, .id = 'exam') %>%
+    add_missing_cols(.names)
 
   # race-ethnicity (RIDRETH) -------------------------------------------------
   #
@@ -36,7 +73,7 @@ clean_demo <- function(
   # `RIDRETH3` includes a category for non-hispanic Asian participants,
   # and this should be incorporated in and after the 2011 exam.
 
-  data_clean_race <- data_all %>%
+  data_clean_race <- data_in %>%
     mutate(
       RIDRETH = if_else(
         exam %in% c(
@@ -160,33 +197,6 @@ clean_demo <- function(
           )
         )
       )
-  )
-
-  var_guide <- tibble(
-    term = c(
-      'age',
-      'sex',
-      'race_ethnicity',
-      'education',
-      'income_hh',
-      'pregnant'
-    ),
-    nhanes = c(
-      'RIDAGEYR',
-      'RIAGENDR',
-      'RIDRETH1 and RIDRETH3',
-      'DMDEDUC2 and DMDEDUC3',
-      'INDHHINC and INDHHIN2',
-      'RIDEXPRG'
-    ),
-    descr = c(
-      "age in years",
-      "sex",
-      "race and ethnicity",
-      "education",
-      "household income",
-      "pregnancy status"
-    )
   )
 
   # income_hh (INDHHINC) ----------------------------------------------------

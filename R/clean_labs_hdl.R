@@ -23,19 +23,16 @@ clean_labs_hdl <- function(
 
   # LBDHDL was used to measure HDL in 1999-2000 and 2001-2002
   # LBXHDD was used to measure HDL in 2003-2004
-  # LBDHDD was used to measure HDL in 2005-2006, ..., 2016-2017
+  # LBDHDD was used to measure HDL in 2005-2006, ..., 2017-2018
 
-  data_out <- map_dfr(
-    .x = fnames,
-    .f = read_xpt,
-    .id = 'exam'
-  ) %>%
-    transmute(
-      exam,
-      seqn = SEQN,
-      chol_hdl_mgdl = coalesce(LBDHDL, LBXHDD, LBDHDD)
-    )
+  data_in <- fnames %>%
+    map_dfr(.f = read_xpt, .id = 'exam') %>%
+    add_missing_cols(.names = c("LBDHDL", "LBXHDD", "LBDHDD")) %>%
+    mutate(chol_hdl_mgdl = coalesce(LBDHDL, LBXHDD, LBDHDD))
 
+  # widdle columns down to the three we want
+  data_out <- data_in %>%
+    select(exam, seqn = SEQN, chol_hdl_mgdl)
 
   if(include_variable_labels){
     add_labels(data_out, var_guide)

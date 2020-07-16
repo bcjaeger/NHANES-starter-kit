@@ -35,8 +35,6 @@ clean_qx_medical_status <- function(
     )
   )
 
-
-
   data_in <- map_dfr(
     .x = fnames,
     .f = read_xpt,

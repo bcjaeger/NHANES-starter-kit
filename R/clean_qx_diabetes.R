@@ -18,32 +18,32 @@ clean_qx_diabetes <- function(
                'meds_glucose'),
     nhanes = c('DIQ010',
                'DIQ050',
-               'DIQ070'),
+               'DIQ070 and DID070'),
     descr  = c('Doctor told you have diabetes',
                'Taking insulin now',
-               'Take diabetic pills to lower blood sugar'))
-
-  data_out <- map_dfr(
-    .x = fnames,
-    .f = read_xpt,
-    .id = 'exam'
+               'Take diabetic pills to lower blood sugar')
   )
+
+  .names <- c('DIQ010',
+              'DIQ050',
+              'DIQ070',
+              'DID070')
+
+  data_in <- fnames %>%
+    map_dfr(.f = read_xpt, .id = 'exam') %>%
+    add_missing_cols(.names)
 
   # The naming convention for meds_glucose was different in exams
   # 2005-2006 and 2007-2008 compared to all other exams.
-  # The names are synchronized here.
+  # The names are synchronized using coalesce().
 
-  if(any(c(2005, 2007) %in% exams)){
-    data_out %<>% mutate(DIQ070 = coalesce(DIQ070, DID070))
-  }
-
-  data_out %<>%
+  data_out <- data_in %>%
     transmute(
       exam,
       seqn = SEQN,
       diab_ever = DIQ010,
       meds_insulin = DIQ050,
-      meds_glucose = DIQ070
+      meds_glucose = coalesce(DIQ070, DID070)
     ) %>%
     mutate(
       diab_ever = recode(diab_ever,
@@ -71,6 +71,7 @@ clean_qx_diabetes <- function(
         values = 'no'
       )
     )
+
   # the last bit of code in the mutate() above is included in order to
   # fix a skip pattern. If both diab_ever and meds_glucose are no,
   # the meds_glucose question was not asked because it was assumed to be no.

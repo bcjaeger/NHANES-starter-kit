@@ -30,12 +30,8 @@ clean_labs_acr <- function(
            acr_mgg)
 
   var_guide <- tibble(
-    term = c(
-      'acr_mgg'
-    ),
-    nhanes = c(
-      'URXUMA and URXUCR'
-    ),
+    term = c('acr_mgg'),
+    nhanes = c('URXUMA and URXUCR'),
     descr = c('Albumin-to-creatinine ratio, mg/g')
   )
 

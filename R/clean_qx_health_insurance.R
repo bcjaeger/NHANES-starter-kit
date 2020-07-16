@@ -18,15 +18,39 @@ clean_qx_health_insurance <- function(
     descr = c('health insurance status')
   )
 
-  data_in <- map_dfr(
-    .x = fnames,
-    .f = read_xpt,
-    .id = 'exam'
-  )
+  .names <- c('HID010' ,
+              'HID030A',
+              'HID030B',
+              'HID030C',
+              'HID030D',
+              'HIQ011' ,
+              'HIQ031A',
+              'HIQ031B',
+              'HIQ031C',
+              'HIQ031D',
+              'HIQ031E',
+              'HIQ031F',
+              'HIQ031G',
+              'HIQ031H',
+              'HIQ031I')
+
+  data_in <- fnames %>%
+    map_dfr(.f = read_xpt, .id = 'exam') %>%
+    add_missing_cols(.names = .names)
 
   # Variable derivation
   # NHANES uses multiple data collection designs.
   # This makes it a little tedious to stack our data.
+  design1 <- c('1999-2000',
+               '2001-2002',
+               '2003-2004')
+  design2 <- c('2005-2006',
+               '2007-2008',
+               '2009-2010',
+               '2011-2012',
+               '2013-2014',
+               '2015-2016',
+               '2017-2018')
 
   # 1999, 2001, and 2003 ----
 
@@ -46,32 +70,25 @@ clean_qx_health_insurance <- function(
 
   # 1. designate the years and columns we need to access.
 
-  design1 <- c('1999-2000', '2001-2002', '2003-2004')
-
-  cols <- c(
-    exam = 'exam',
-    seqn = 'SEQN',
-    hins_any = 'HID010',
-    hins_priv = 'HID030A',
-    # HIQ031A and HIQ031C in 2005+
-    hins_medicare = 'HID030B',
-    # HIQ031B in 2005+
-    hins_medicaid_chip = 'HID030C',
-    # HIQ031E and HIQ031D in 2005+
-    hins_other_govt = 'HID030D'
-    # HIQ031F HIQ031G, HIQ031H, and HIQ031I in 2005+
-  )
 
   # 2. stack the data from these years together, and recode columns.
 
   hiq1 <- data_in %>%
-    select(!!!cols) %>%
+    select(
+      exam = exam,
+      seqn = SEQN,
+      hins_any = HID010,
+      hins_priv = HID030A, # HIQ031A, HIQ031C in 2005+
+      hins_medicare = HID030B, # HIQ031B in 2005+
+      hins_medicaid_chip = HID030C, # HIQ031E, HIQ031D in 2005+
+      hins_other_govt = HID030D # HIQ031F HIQ031G, HIQ031H, HIQ031I in 2005+
+    ) %>%
     filter(exam %in% design1) %>%
     mutate(
       across(starts_with("hins"),
              ~ recode(.x,
-                      '1' = 'Yes',
-                      '2' = 'No',
+                      '1' = 'yes',
+                      '2' = 'no',
                       '7' = NA_character_,
                       '9' = NA_character_
              )
@@ -83,33 +100,35 @@ clean_qx_health_insurance <- function(
 
   hiq1 %<>%
     mutate(
-      # all the indicators other than hins_any were 'No'
-      all_no = hins_priv == 'No' &
-        hins_medicare == 'No' &
-        hins_medicaid_chip == 'No' &
-        hins_other_govt == 'No',
+      # all the indicators other than hins_any were 'no'
+      all_no =
+        hins_priv          == 'no' &
+        hins_medicare      == 'no' &
+        hins_medicaid_chip == 'no' &
+        hins_other_govt    == 'no',
       # all the indicators other than hins_any were NA
-      all_na = is.na(hins_priv) &
+      all_na =
+        is.na(hins_priv) &
         is.na(hins_medicare) &
         is.na(hins_medicaid_chip) &
         is.na(hins_other_govt),
       # collapse categories
       health_insurance = case_when(
-        hins_any == 'No' ~ "None",
+        hins_any == 'no' ~ "None",
         all_no ~ NA_character_,
         all_na ~ NA_character_,
-        hins_priv == 'Yes' ~ "Private",
-        hins_medicare == 'Yes' ~ "Medicare",
-        hins_medicaid_chip == 'Yes' ~ "Medicaid",
-        hins_any == 'Yes' ~ 'Government'
+        hins_priv == 'yes' ~ "Private",
+        hins_medicare == 'yes' ~ "Medicare",
+        hins_medicaid_chip == 'yes' ~ "Medicaid",
+        hins_any == 'yes' ~ 'Government'
       )
-    )
-
-  hiq1
+    ) %>%
+    select(seqn, exam, health_insurance)
 
   # 4. Check things out:
   # count(hiq1, hins_any, hins_priv, hins_medicare,
   #       hins_medicaid_chip, hins_other_govt, health_insurance)
+
 
   # 2005 through 2017 ----
 
@@ -119,13 +138,6 @@ clean_qx_health_insurance <- function(
   # individual participant in the family. During and after 2005, each
   # participant responds for themselves, except in situations where a
   # proxy is needed. We use the same 3 step protocol:
-
-  # 1. designate the years and columns we need to access.
-
-  design2 <- setdiff(unique(data_in$exam), design1)
-
-
-  # 2. stack the data from these years together, and recode the columns
 
   hiq2 <- data_in %>%
     filter(exam %in% design2) %>%
@@ -145,17 +157,17 @@ clean_qx_health_insurance <- function(
     ) %>%
     mutate(
       hins_any = recode(hins_any,
-                        '1' = 'Yes',
-                        '2' = 'No',
+                        '1' = 'yes',
+                        '2' = 'no',
                         '7' = NA_character_,
                         '9' = NA_character_
       ),
       hins_priv = recode(hins_priv,
-                         "14" = "Yes",
+                         "14" = "yes",
                          "77" = NA_character_,
                          "99" = NA_character_
       ),
-      hins_priv = if_else(is.na(hins_priv), 'No', hins_priv)
+      hins_priv = if_else(is.na(hins_priv), 'no', hins_priv)
     ) %>%
     mutate_at(
       .vars = vars(
@@ -168,23 +180,20 @@ clean_qx_health_insurance <- function(
         hins_state,
         hins_other_govt
       ),
-      .funs = ~if_else(is.na(.x), "No", "Yes")
+      .funs = ~if_else(is.na(.x), "no", "yes")
     )
-
-  # 3. Collapse the separate health insurance indicator columns into one
-  # column (`health_insurance`) with the categories we want.
 
   hiq2 %<>%
     mutate(
-      all_no = hins_priv == 'No' &
-        hins_medicare == 'No' &
-        hins_medigap == 'No' &
-        hins_medicaid == 'No' &
-        hins_schip == 'No' &
-        hins_military == 'No' &
-        hins_indian == 'No' &
-        hins_state == 'No' &
-        hins_other_govt == 'No',
+      all_no = hins_priv == 'no' &
+        hins_medicare == 'no' &
+        hins_medigap == 'no' &
+        hins_medicaid == 'no' &
+        hins_schip == 'no' &
+        hins_military == 'no' &
+        hins_indian == 'no' &
+        hins_state == 'no' &
+        hins_other_govt == 'no',
       # all the indicators other than hins_any were NA
       all_na = is.na(hins_priv) &
         is.na(hins_medicare) &
@@ -197,32 +206,20 @@ clean_qx_health_insurance <- function(
         is.na(hins_other_govt),
       # collapse categories
       health_insurance = case_when(
-        hins_any == 'No' ~ "None",
+        hins_any == 'no' ~ "None",
         all_no ~ NA_character_,
         all_na ~ NA_character_,
-        hins_priv == 'Yes' ~ "Private",
-        hins_medicare == 'Yes' ~ "Medicare",
-        hins_medicaid == 'Yes' | hins_schip == 'Yes' ~ "Medicaid",
-        hins_any == 'Yes' ~ 'Government'
+        hins_priv == 'yes' ~ "Private",
+        hins_medicare == 'yes' ~ "Medicare",
+        hins_medicaid == 'yes' | hins_schip == 'yes' ~ "Medicaid",
+        hins_any == 'yes' ~ 'Government'
       )
     )
 
-
-  # 4. Check the table below to see how we assigned categories
-  # count(hiq2, hins_any, hins_priv, hins_medicare, hins_medigap,
-  #       hins_medicaid, hins_schip, hins_military, hins_indian,
-  #       hins_state, hins_other_govt, health_insurance)
-
   # Stacking ----
 
-  # The data from each different survey design need to be stacked,
-  # using only the relevant columns.
-
-  data_out <- bind_rows(
-    select(hiq1, seqn, exam, health_insurance),
-    select(hiq2, seqn, exam, health_insurance)
-  )
-
+  data_out <- bind_rows(hiq1, hiq2) %>%
+    select(exam, seqn, health_insurance)
 
   if(include_variable_labels){
     add_labels(data_out, var_guide)

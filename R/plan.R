@@ -26,7 +26,7 @@ the_plan <- drake_plan(
   qx_high_blood_pressure    = clean_qx_high_bp(exams),
   qx_healthcare_utilization = clean_qx_healthcare_utilization(exams),
 
-  data_analysis = reduce(
+  data_pooled = reduce(
     .x = list(
       demo,
       exam_bp,
@@ -45,8 +45,12 @@ the_plan <- drake_plan(
     ),
     .f = left_join,
     by = c('exam', 'seqn')
-  )
+  ),
 
+  data_derived = data_pooled %>%
+    derive_diabetes() %>%
+    derive_egfrCKDepi() %>%
+    derive_ascvd_risk_pcr(set_miss_to_no = 'diabetes')
 
 
 )

@@ -35,6 +35,7 @@ clean_labs_trig <- function(
   ) %>%
     select(exam,
            seqn = SEQN,
+           wts_af_2yr = WTSAF2YR,
            chol_ldl_mgdl = LBDLDL,
            triglycerides_mgdl = LBXTR)
 

@@ -47,12 +47,12 @@ the_plan <- drake_plan(
     ),
     .f = left_join,
     by = c('exam', 'seqn')
-  ),
+  ) %>%
+    relocate(starts_with('wts'), .before = exam_status),
 
   data_derived = data_pooled %>%
     derive_diabetes() %>%
     derive_egfrCKDepi() %>%
-    derive_ascvd_risk_pcr(set_miss_to_no = 'diabetes')
-
+    derive_ascvd_risk_pcr()
 
 )

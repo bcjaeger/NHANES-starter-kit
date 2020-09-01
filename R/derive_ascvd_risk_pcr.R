@@ -35,10 +35,13 @@ derive_ascvd_risk_pcr <- function(data,
     stop(msg, call. = FALSE)
   }
 
-  data %<>% mutate(
-    across(all_of(set_miss_to_no),
-           ~replace(.x, is.na(.x), 'no'))
-  )
+  if(!is.null(set_miss_to_no))
+    data %<>% mutate(
+      across(
+        all_of(set_miss_to_no),
+        ~replace(.x, is.na(.x), 'no')
+      )
+    )
 
   data_out <- data %>%
     mutate(

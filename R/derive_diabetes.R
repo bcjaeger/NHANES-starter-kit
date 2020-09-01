@@ -32,7 +32,6 @@ derive_diabetes <- function(data,
 
   check_required_variables(data, .variables)
 
-
   data_out <- data %>%
     mutate(
       fasted = if_else(
@@ -42,16 +41,33 @@ derive_diabetes <- function(data,
         true = 'yes',
         false = 'no'
       ),
-      diabetes = if_else(
-        condition =
+      # un-comment this definition to...
+      # assume diabetes is 'no' unless otherwise indicated.
+      # note: this is the default b/c it is commonly done,
+      # but I do not agree with it.
+      diabetes = 'no',
+      diabetes = replace(
+        diabetes, list =
           (gluc_mgdl >= gluc_cutpoint_fasted & fasted == 'yes') | # OR
           (gluc_mgdl >= gluc_cutpoint_fed & fasted == 'no')     | # OR
           (hba1c_perc >= hba1c_cutpoint)                        | # OR
           (diab_ever == 'yes' & meds_insulin == 'yes')          | # OR
           (diab_ever == 'yes' & meds_glucose == 'yes'),
-        true = 'yes',
-        false = 'no'
+        values = 'yes'
       )
+      # un-comment this definition to ...
+      # refrain from making  any assumptions about diabetes status
+      # in cases with missing data.
+      # diabetes = if_else(
+      #   condition =
+      #     (gluc_mgdl >= gluc_cutpoint_fasted & fasted == 'yes') | # OR
+      #     (gluc_mgdl >= gluc_cutpoint_fed & fasted == 'no')     | # OR
+      #     (hba1c_perc >= hba1c_cutpoint)                        | # OR
+      #     (diab_ever == 'yes' & meds_insulin == 'yes')          | # OR
+      #     (diab_ever == 'yes' & meds_glucose == 'yes'),
+      #   true = 'yes',
+      #   false = 'no'
+      # )
     )
 
   if(include_variable_labels){

@@ -67,12 +67,12 @@ derive_ascvd_risk_pcr <- function(data,
           0.940 * log(chol_total_mgdl) +
           (-18.92) * log(chol_hdl_mgdl) +
           4.475 * log(age) * log(chol_hdl_mgdl) +
-          29.291 * log(bp_sys_mmhg) * (meds_bp == 'Yes') +
-          (-6.432) * log(age) * log(bp_sys_mmhg) * (meds_bp == 'Yes') +
-          27.820 * log(bp_sys_mmhg) * (meds_bp == 'No') +
-          (-6.087) * log(age) * log(bp_sys_mmhg) * (meds_bp == 'No') +
-          0.691 * (smk_current == 'Yes') +
-          0.874 * (diabetes == 'Yes'),
+          29.291 * log(bp_sys_mmhg) * (meds_bp == 'yes') +
+          (-6.432) * log(age) * log(bp_sys_mmhg) * (meds_bp == 'yes') +
+          27.820 * log(bp_sys_mmhg) * (meds_bp == 'no') +
+          (-6.087) * log(age) * log(bp_sys_mmhg) * (meds_bp == 'no') +
+          0.691 * (smk_current == 'yes') +
+          0.874 * (diabetes == 'yes'),
         sex == 'Female' & race_ethnicity != 'Non-Hispanic Black' ~
           (-29.799) * log(age) +
           4.884 * log(age)^2 +
@@ -80,30 +80,30 @@ derive_ascvd_risk_pcr <- function(data,
           (-3.114) * log(age) * log(chol_total_mgdl) +
           (-13.578) * log(chol_hdl_mgdl) +
           3.149 * log(age) * log(chol_hdl_mgdl) +
-          2.019 * log(bp_sys_mmhg) * (meds_bp == 'Yes') +
-          1.957 * log(bp_sys_mmhg) * (meds_bp == 'No') +
-          7.574 * (smk_current == 'Yes') +
-          (-1.665) * log(age) * (smk_current == 'Yes') +
-          0.661 * (diabetes == 'Yes'),
+          2.019 * log(bp_sys_mmhg) * (meds_bp == 'yes') +
+          1.957 * log(bp_sys_mmhg) * (meds_bp == 'no') +
+          7.574 * (smk_current == 'yes') +
+          (-1.665) * log(age) * (smk_current == 'yes') +
+          0.661 * (diabetes == 'yes'),
         sex == 'Male' & race_ethnicity == 'Non-Hispanic Black' ~
           2.469 * log(age) +
           0.302 * log(chol_total_mgdl) +
           (-0.307) * log(chol_hdl_mgdl) +
-          1.916 * log(bp_sys_mmhg) * (meds_bp == 'Yes') +
-          1.809 * log(bp_sys_mmhg) * (meds_bp == 'No') +
-          0.549 * (smk_current == 'Yes') +
-          0.645 * (diabetes == 'Yes'),
+          1.916 * log(bp_sys_mmhg) * (meds_bp == 'yes') +
+          1.809 * log(bp_sys_mmhg) * (meds_bp == 'no') +
+          0.549 * (smk_current == 'yes') +
+          0.645 * (diabetes == 'yes'),
         sex == 'Male' & race_ethnicity != 'Non-Hispanic Black' ~
           12.344 * log(age) +
           11.853 * log(chol_total_mgdl) +
           (-2.664) * log(age) * log(chol_total_mgdl) +
           (-7.990) * log(chol_hdl_mgdl) +
           1.769 * log(age) * log(chol_hdl_mgdl) +
-          1.797 * log(bp_sys_mmhg) * (meds_bp == 'Yes') +
-          1.764 * log(bp_sys_mmhg) * (meds_bp == 'No') +
-          7.837 * (smk_current == 'Yes') +
-          (-1.795) * log(age) * (smk_current == 'Yes') +
-          0.658 * (diabetes == 'Yes')
+          1.797 * log(bp_sys_mmhg) * (meds_bp == 'yes') +
+          1.764 * log(bp_sys_mmhg) * (meds_bp == 'no') +
+          7.837 * (smk_current == 'yes') +
+          (-1.795) * log(age) * (smk_current == 'yes') +
+          0.658 * (diabetes == 'yes')
       ),
       ascvd_risk_pcr = 1 - base_surv^exp(ind_sum - mean_coef)
     ) %>%

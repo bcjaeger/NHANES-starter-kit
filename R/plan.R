@@ -16,6 +16,7 @@ the_plan <- drake_plan(
   labs_fasting = clean_labs_fasting(exams),
   labs_ghb     = clean_labs_ghb(exams),
   labs_hdl     = clean_labs_hdl(exams),
+  labs_trig    = clean_labs_trig(exams),
   labs_tchol   = clean_labs_tchol(exams),
 
   # Questionnaires ----
@@ -35,6 +36,7 @@ the_plan <- drake_plan(
       labs_fasting,
       labs_ghb,
       labs_hdl,
+      labs_trig,
       labs_tchol,
       qx_medical_status,
       qx_smoking_status,

@@ -53,6 +53,9 @@ the_plan <- drake_plan(
   data_derived = data_pooled %>%
     derive_diabetes() %>%
     derive_egfrCKDepi() %>%
-    derive_ascvd_risk_pcr()
+    derive_ascvd_risk_pcr() %>%
+    derive_sampson_ldl(),
+
+  write_csv(data_derived, '../NHANES_derived.csv')
 
 )

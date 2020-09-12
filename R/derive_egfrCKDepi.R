@@ -11,6 +11,7 @@ derive_egfrCKDepi <- function(data,
   .variables <- c(
       'clean_demo.R' = 'age',
       'clean_demo.R' = 'sex',
+      'clean_demo.R' = 'race_ethnicity',
       'clean_labs_biopro.R'  = 'creat_mgdl'
   )
 
@@ -20,11 +21,16 @@ derive_egfrCKDepi <- function(data,
     mutate(
       # abbreviate the name so equations fit on one line
       cre = creat_mgdl,
+      aa = race_ethnicity == "Non-Hispanic black",
       egfr_ckdepi = case_when(
-        sex=='Female' & cre<=0.7 ~ 166*((cre/0.7)^(-0.329))*(0.993^(age)),
-        sex=='Female' & cre >0.7 ~ 166*((cre/0.7)^(-1.209))*(0.993^(age)),
-        sex=='Male'   & cre<=0.9 ~ 163*((cre/0.9)^(-0.411))*(0.993^(age)),
-        sex=='Male'   & cre >0.9 ~ 163*((cre/0.9)^(-1.209))*(0.993^(age))
+        aa  & sex=='Female' & cre<=0.7 ~166*((cre/0.7)^(-0.329))*(0.993^(age)),
+        aa  & sex=='Female' & cre >0.7 ~166*((cre/0.7)^(-1.209))*(0.993^(age)),
+        aa  & sex=='Male'   & cre<=0.9 ~163*((cre/0.9)^(-0.411))*(0.993^(age)),
+        aa  & sex=='Male'   & cre >0.9 ~163*((cre/0.9)^(-1.209))*(0.993^(age)),
+        !aa & sex=='Female' & cre<=0.7 ~144*((cre/0.7)^(-0.329))*(0.993^(age)),
+        !aa & sex=='Female' & cre >0.7 ~144*((cre/0.7)^(-1.209))*(0.993^(age)),
+        !aa & sex=='Male'   & cre<=0.9 ~141*((cre/0.9)^(-0.411))*(0.993^(age)),
+        !aa & sex=='Male'   & cre >0.9 ~141*((cre/0.9)^(-1.209))*(0.993^(age))
       ),
       egfr_low = if_else(egfr_ckdepi < egfr_cutpoint, "yes", "no"
       )

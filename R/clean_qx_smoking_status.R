@@ -7,7 +7,7 @@
 
 clean_qx_smoking_status <- function(
   exams = c(1999, 2001, 2003, 2005, 2007, 2009, 2011, 2013, 2015, 2017),
-  include_variable_labels = TRUE
+  include_variable_labels = FALSE
 ) {
 
   fnames <- make_exam_files(exams, data_label = 'SMQ')
@@ -15,14 +15,17 @@ clean_qx_smoking_status <- function(
   var_guide <- tibble(
     term = c(
       'smk_current',
+      'smk_status',
       'smk_quit_howlong'
     ),
     nhanes = c(
+      "SMQ020 and SMQ040",
       "SMQ020 and SMQ040",
       "SMQ050Q and SMQ050U"
     ),
     descr = c(
       "Smoked at least 100 cigarettes and currently smoking",
+      "Smoking status",
       "If ever smoked, how many days since quitting"
     )
   )
@@ -64,6 +67,11 @@ clean_qx_smoking_status <- function(
         smk_quit_units == 4 ~ smk_quit_howlong * 365.25,  # years
         TRUE ~ NA_real_
       ),
+      smk_status = case_when(
+        smk_now == "yes" & smk_100 == "yes" ~ "current",
+        smk_now == "no" & smk_quit_howlong > 7 ~ "former",
+        smk_now == "no" | smk_100 == 'no' ~ "never"
+      ),
       smk_current = if_else(
         smk_now == "yes" & smk_100 == "yes",
         true = "yes",
@@ -73,6 +81,7 @@ clean_qx_smoking_status <- function(
     select(exam,
            seqn,
            smk_current,
+           smk_status,
            smk_quit_howlong)
 
   if(include_variable_labels){

@@ -56,6 +56,6 @@ the_plan <- drake_plan(
     derive_ascvd_risk_pcr() %>%
     derive_sampson_ldl(),
 
-  write_csv(data_derived, '../NHANES_derived.csv')
+  write_csv(data_derived, 'NHANES_derived.csv')
 
 )

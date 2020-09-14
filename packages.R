@@ -1,29 +1,31 @@
 
 ## library() calls go here
-library(conflicted)  # manage the namespace
-library(dotenv)
-library(drake)
-# data management
-library(haven)       # reading sas data
-library(janitor)     # cleaning names
-library(magrittr)    # %>% and %<>%
-library(labelled)    # add variable labels
-library(nephro)      # compute egfr ckd-epi
-# data analysis
-library(tidyverse)
-library(tidyselect)
-# reporting
-library(tblStrings)
-library(officer)
-library(glue)
-library(flextable)
-library(devEMF)
-library(magick)
-library(paletteer)
 
-conflicted::conflict_prefer("roc",       "pROC")
+pacman::p_load(
+
+  # workspace managers ----
+  conflicted,  # manage the namespace
+  dotenv,      # manage environment variables
+  drake,       # make the plan!
+
+  # data management ----
+  haven,       # reading sas data
+  janitor,     # cleaning names
+  magrittr,    # %>% and %<>%
+  labelled,    # add variable labels
+  nephro,      # compute egfr ckd-epi
+
+  # data analysis ----
+  tidyverse,
+  tidyselect,
+
+  # reporting
+  glue
+)
+
+# manage namespace conflicts
+
 conflicted::conflict_prefer("filter",    "dplyr")
-conflicted::conflict_prefer("slice",     "dplyr")
 conflicted::conflict_prefer('summarise', 'dplyr')
 conflicted::conflict_prefer("gather",    "tidyr")
 conflicted::conflict_prefer("set_names", "purrr")

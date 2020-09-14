@@ -1,12 +1,14 @@
+
 ## library() calls go here
-library(conflicted)
+library(conflicted)  # manage the namespace
 library(dotenv)
 library(drake)
 # data management
-library(haven)
-library(janitor)
-library(magrittr)
-library(labelled)
+library(haven)       # reading sas data
+library(janitor)     # cleaning names
+library(magrittr)    # %>% and %<>%
+library(labelled)    # add variable labels
+library(nephro)      # compute egfr ckd-epi
 # data analysis
 library(tidyverse)
 library(tidyselect)

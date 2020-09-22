@@ -5,6 +5,9 @@
 # Session Data files
 .RData
 
+# dont upload the derived set to github
+NHANES_derived
+
 # Example code in package build process
 *-Ex.R
 

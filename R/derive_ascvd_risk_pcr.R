@@ -43,81 +43,76 @@ derive_ascvd_risk_pcr <- function(data,
       )
     )
 
-  data_out <- data %>%
+  data_out <- suppressWarnings(
     mutate(
-      # baseline survival probability varies by race/sex
-      base_surv = case_when(
-        sex == 'Female' & race_ethnicity == 'Non-Hispanic Black' ~ 0.9533,
-        sex == 'Female' & race_ethnicity != 'Non-Hispanic Black' ~ 0.9665,
-        sex == 'Male'   & race_ethnicity == 'Non-Hispanic Black' ~ 0.8954,
-        sex == 'Male'   & race_ethnicity != 'Non-Hispanic Black' ~ 0.9144,
-        TRUE ~ NA_real_
+      data,
+      ascvd_risk_pcr = predict_10yr_ascvd_risk(
+        age_years = age,
+        race = race_ethnicity,
+        sex = sex,
+        smoke_current = smk_current,
+        chol_total_mgdl = chol_total_mgdl,
+        chol_hdl_mgdl = chol_hdl_mgdl,
+        bp_sys_mmhg = bp_sys_mmhg,
+        bp_meds = meds_bp,
+        diabetes = diabetes,
+        equation_version = "Goff_2013",
+        override_boundary_errors = TRUE,
+        race_levels = list(
+          white = c(
+            "Non-Hispanic White",
+            "Hispanic",
+            "Non-Hispanic Asian",
+            "Mexican American",
+            "Other Hispanic",
+            "Other Race - Including Multi-Racial"
+          ),
+          black = "Non-Hispanic Black"
+        ),
+        sex_levels = list(
+          male = 'Male',
+          female = 'Female'
+        )
       ),
-      # mean log-hazard varies by race/sex
-      mean_coef = case_when(
-        sex == 'Female' & race_ethnicity == 'Non-Hispanic Black' ~ 86.61,
-        sex == 'Female' & race_ethnicity != 'Non-Hispanic Black' ~ -29.18,
-        sex == 'Male'   & race_ethnicity == 'Non-Hispanic Black' ~ 19.54,
-        sex == 'Male'   & race_ethnicity != 'Non-Hispanic Black' ~ 61.18,
-        TRUE ~ NA_real_
-      ),
-      # individual sums taken from Table A of
-      # 2013 ACC/AHA Guideline on the Assessment of
-      # Cardiovascular Risk
-      ind_sum = case_when(
-        sex == 'Female' & race_ethnicity == 'Non-Hispanic Black' ~
-          17.114 * log(age) +
-          0.940 * log(chol_total_mgdl) +
-          (-18.92) * log(chol_hdl_mgdl) +
-          4.475 * log(age) * log(chol_hdl_mgdl) +
-          29.291 * log(bp_sys_mmhg) * (meds_bp == 'yes') +
-          (-6.432) * log(age) * log(bp_sys_mmhg) * (meds_bp == 'yes') +
-          27.820 * log(bp_sys_mmhg) * (meds_bp == 'no') +
-          (-6.087) * log(age) * log(bp_sys_mmhg) * (meds_bp == 'no') +
-          0.691 * (smk_current == 'yes') +
-          0.874 * (diabetes == 'yes'),
-        sex == 'Female' & race_ethnicity != 'Non-Hispanic Black' ~
-          (-29.799) * log(age) +
-          4.884 * log(age)^2 +
-          13.540 * log(chol_total_mgdl) +
-          (-3.114) * log(age) * log(chol_total_mgdl) +
-          (-13.578) * log(chol_hdl_mgdl) +
-          3.149 * log(age) * log(chol_hdl_mgdl) +
-          2.019 * log(bp_sys_mmhg) * (meds_bp == 'yes') +
-          1.957 * log(bp_sys_mmhg) * (meds_bp == 'no') +
-          7.574 * (smk_current == 'yes') +
-          (-1.665) * log(age) * (smk_current == 'yes') +
-          0.661 * (diabetes == 'yes'),
-        sex == 'Male' & race_ethnicity == 'Non-Hispanic Black' ~
-          2.469 * log(age) +
-          0.302 * log(chol_total_mgdl) +
-          (-0.307) * log(chol_hdl_mgdl) +
-          1.916 * log(bp_sys_mmhg) * (meds_bp == 'yes') +
-          1.809 * log(bp_sys_mmhg) * (meds_bp == 'no') +
-          0.549 * (smk_current == 'yes') +
-          0.645 * (diabetes == 'yes'),
-        sex == 'Male' & race_ethnicity != 'Non-Hispanic Black' ~
-          12.344 * log(age) +
-          11.853 * log(chol_total_mgdl) +
-          (-2.664) * log(age) * log(chol_total_mgdl) +
-          (-7.990) * log(chol_hdl_mgdl) +
-          1.769 * log(age) * log(chol_hdl_mgdl) +
-          1.797 * log(bp_sys_mmhg) * (meds_bp == 'yes') +
-          1.764 * log(bp_sys_mmhg) * (meds_bp == 'no') +
-          7.837 * (smk_current == 'yes') +
-          (-1.795) * log(age) * (smk_current == 'yes') +
-          0.658 * (diabetes == 'yes')
-      ),
-      ascvd_risk_pcr = 1 - base_surv^exp(ind_sum - mean_coef)
-    ) %>%
-    select(-base_surv, -mean_coef, -ind_sum)
+      ascvd_risk_pcr_yadlowsky = predict_10yr_ascvd_risk(
+        age_years = age,
+        race = race_ethnicity,
+        sex = sex,
+        smoke_current = smk_current,
+        chol_total_mgdl = chol_total_mgdl,
+        chol_hdl_mgdl = chol_hdl_mgdl,
+        bp_sys_mmhg = bp_sys_mmhg,
+        bp_meds = meds_bp,
+        diabetes = diabetes,
+        equation_version = 'Yadlowsky_2018',
+        override_boundary_errors = TRUE,
+        race_levels = list(
+          white = c(
+            "Non-Hispanic White",
+            "Hispanic",
+            "Non-Hispanic Asian",
+            "Mexican American",
+            "Other Hispanic",
+            "Other Race - Including Multi-Racial"
+          ),
+          black = "Non-Hispanic Black"
+        ),
+        sex_levels = list(
+          male = 'Male',
+          female = 'Female'
+        )
+      )
+    )
+  )
+
 
   if(include_variable_labels){
 
     var_guide <- tibble(
-      term = c('ascvd_risk_pcr'),
+      term = c('ascvd_risk_pcr', 'ascvd_risk_pcr_yadlowsky'),
       nhanes = NA_character_,
-      descr = c("10-year predicted risk for ASCVD, pooled cohort equations")
+      descr = c("10-year predicted risk for ASCVD, pooled cohort equations",
+                "10-year predicted risk for ASCVD, updated pooled cohort equations")
     )
 
     return(add_labels(data_out, var_guide, ref_nhanes = FALSE))

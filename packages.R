@@ -21,7 +21,10 @@ pacman::p_load(
 
   # reporting
   glue
+
 )
+
+pacman::p_load_gh('bcjaeger/PooledCohort', install = TRUE)
 
 # manage namespace conflicts
 

@@ -27,6 +27,9 @@ the_plan <- drake_plan(
   qx_high_blood_pressure    = clean_qx_high_bp(exams),
   qx_healthcare_utilization = clean_qx_healthcare_utilization(exams),
 
+  # Mortality ----
+  events_mortality = clean_mort(exams),
+
   data_pooled = reduce(
     .x = list(
       demo,
@@ -43,7 +46,8 @@ the_plan <- drake_plan(
       qx_health_insurance,
       qx_diabetes,
       qx_high_blood_pressure,
-      qx_healthcare_utilization
+      qx_healthcare_utilization,
+      events_mortality
     ),
     .f = left_join,
     by = c('exam', 'seqn')
